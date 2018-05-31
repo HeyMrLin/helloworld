@@ -17,7 +17,7 @@ $handler = opendir($path);
 $index = 1;
 while( ($filename = readdir($handler)) !== false ) 
 {
-	if($filename != "." && $filename != "..") // &&strpos($filename,".jpg")!==false
+	if($filename != "." && $filename != ".."&&strpos($filename,".jpg")!==false) // &&strpos($filename,".jpg")!==false
 	{
 		$obj = (object)array("filename"=>$filename,"rownum"=>$index);
 		$obj = json_encode($obj);
