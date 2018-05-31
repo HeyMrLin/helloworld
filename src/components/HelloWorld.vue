@@ -1,85 +1,31 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div>
+    <el-upload
+  class="upload-demo"
+  ref="upload"
+  action="http://localhost:1234/updatefile/upload_file.php"
+  :on-preview="handlePreview"
+  :on-remove="handleRemove"
+  :auto-upload="false">
+  <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+</el-upload>
+<el-table
+      :data="imgFileNameData"
+      style="width: 100%">
+      <el-table-column
+        prop="rownum"
+        label="index"
+        width="80">
+      </el-table-column>
+      <el-table-column
+        prop="filename"
+        align="center"
+        label="file"
+        width="180">
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
@@ -88,9 +34,34 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      imgFileNameData:[],
     }
-  }
+  },
+  mounted(){
+    this.getData();
+  },
+  methods: {
+      submitUpload() {
+        this.$refs.upload.submit();
+      },
+      handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePreview(file) {
+        console.log(file);
+      },
+      getData(){
+        let _this = this;
+        $.post("http://localhost:1234/updatefile/handlefile.php",{},function(res){
+          //console.log(JSON.parse(res));
+          let json = JSON.parse(res);
+          for (let i=0;i<json.data.length;i++){
+            _this.imgFileNameData.push(JSON.parse(json.data[i]))
+          }
+        });
+      }
+    }
 }
 </script>
 
