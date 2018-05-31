@@ -1,17 +1,29 @@
 <template>
   <div>
     <el-upload
-  class="upload-demo"
-  ref="upload"
-  action="http://localhost:1234/updatefile/upload_file.php"
-  :on-preview="handlePreview"
-  :on-remove="handleRemove"
-  :auto-upload="false">
-  <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-</el-upload>
-<el-table
+      class="upload-demo"
+      ref="upload"
+      action="http://localhost:8888/uploadfile/upload_file.php"
+      :on-success="successUpload"
+      :auto-upload="false">
+      <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+      <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+    </el-upload>
+    <el-row :gutter="24">
+      <el-form label-position="right" label-width="80px" :inline="true">
+        <el-col :span="8">
+          <el-form-item label="文件名">
+            <el-input v-model="deleteFileName"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="deleteFile()">删除</el-button>
+          </el-form-item>
+        </el-col>
+      </el-form>
+    </el-row>
+
+    <el-table
       :data="imgFileNameData"
       style="width: 100%">
       <el-table-column
@@ -30,55 +42,70 @@
 </template>
 
 <script>
-export default {
-  name: 'HelloWorld',
-  data () {
-    return {
-      msg: 'Welcome to Your Vue.js App',
-      imgFileNameData:[],
-    }
-  },
-  mounted(){
-    this.getData();
-  },
-  methods: {
+  export default {
+    name: 'HelloWorld',
+    data() {
+      return {
+        msg: 'Welcome to Your Vue.js App',
+        imgFileNameData: [], //文件名
+        deleteFileName:"", //需要删除的图片名
+      }
+    },
+    mounted() {
+      this.getData();
+    },
+    methods: {
       submitUpload() {
         this.$refs.upload.submit();
       },
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
+      successUpload(response){
+        if(response.result === "200"){
+          this.getData();
+        }
       },
-      handlePreview(file) {
-        console.log(file);
-      },
-      getData(){
+      getData() {
         let _this = this;
-        $.post("http://localhost:1234/updatefile/handlefile.php",{},function(res){
+        _this.imgFileNameData=[];
+        $.post("http://localhost:8888/uploadfile/handlefile.php", {}, function (res) {
           //console.log(JSON.parse(res));
           let json = JSON.parse(res);
-          for (let i=0;i<json.data.length;i++){
+          for (let i = 0; i < json.data.length; i++) {
             _this.imgFileNameData.push(JSON.parse(json.data[i]))
           }
         });
-      }
+      },
+      deleteFile() {
+        let _this=this;
+        $.post("http://localhost:8888/uploadfile/deletefile.php", {filename: this.deleteFileName}, function (data) {
+          //console.log(JSON.parse(data));
+          let json = JSON.parse(data);
+          if (json.result === "200") {
+            _this.getData();
+            _this.deleteFileName="";
+          }
+        })
+      },
     }
-}
+  }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
+  h1, h2 {
+    font-weight: normal;
+  }
+
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+
+  a {
+    color: #42b983;
+  }
 </style>
