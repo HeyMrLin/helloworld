@@ -76,7 +76,7 @@
             _this.imgFileNameData.push(JSON.parse(json.data[i]))
           }
           _this.imgFileNameData.sort(function (a,b) {
-            return a.filename-b.filename;
+            return parseInt(a.filename)-parseInt(b.filename);
           });
           _this.imgFileName = json.imgFileName;
           _this.configFileName = json.configFileName.replace(/\.js/,"");
