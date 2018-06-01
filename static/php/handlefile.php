@@ -1,18 +1,11 @@
 <?php
 header('Access-Control-Allow-Origin:https://localhost:8080');
 header('Access-Control-Allow-Origin:*');
+include_once './getpath.php';
 $root_dir_name = $_SERVER['DOCUMENT_ROOT'];
 $filenamearr=array();
 $axi = opendir($root_dir_name."/axi");
-$needpath;
-
-while( ($rootfilename = readdir($axi)) !== false ) 
-{
-	if ($rootfilename!="."&&$rootfilename!=".."&&strpos($rootfilename,"img")!==false) {
-		$needpath = $rootfilename;
-	}
-}
-$path = $root_dir_name."/axi/".$needpath;
+$path = $root_dir_name."/axi/".getPath("/axi/","img");
 $handler = opendir($path);
 $index = 1;
 while( ($filename = readdir($handler)) !== false ) 
@@ -25,9 +18,13 @@ while( ($filename = readdir($handler)) !== false )
 		$index++;
 	}
 }
+$imgFileName = getPath("/axi/","img");
+$configFileName = getPath("/axi/js/","config");
 echo json_encode(array(
 	"result"=>"200",
 	"message"=>"文件名获取成功",
-	"data"=>$filenamearr
+	"data"=>$filenamearr,
+	"imgFileName"=>$imgFileName,
+	"configFileName"=>$configFileName
 ));
 ?>

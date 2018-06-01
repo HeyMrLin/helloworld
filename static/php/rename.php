@@ -1,54 +1,38 @@
 <?php 
-header("Content-type: text/html; charset=utf-8"); 
-$newimgname = $_POST["newimgname"];
-$newconfigname = $_POST["newconfigname"];
+header("Content-type: text/html; charset=utf-8");
+header('Access-Control-Allow-Origin:https://localhost:8080');
+header('Access-Control-Allow-Origin:*');
+$newname = $_POST["newname"];
+$type = $_POST["type"];
 $root_dir_name = $_SERVER['DOCUMENT_ROOT'];
-$needpath;
-modificationfile('"img_url":"'.$newimgname.'"',2,$root_dir_name."/axi/js/","config");
-modificationfile('<script type="text/javascript" src="js/'.$newconfigname.'.js"></script>',73,$root_dir_name."/axi/","index");
-// 修改文件
-function modificationfile($replaceStr,$line,$path,$key)	// 参数:$replaceStr--要替换的内容，$line--第几行，$path--文件路径，$key--文件的关键字
-{
-	$configfilenamestr;
-	$config = opendir($path);
-	while( ($configfilename = readdir($config)) !== false ) 
-	{
-		if ($configfilename!="."&&$configfilename!=".."&&strpos($configfilename,$key)!==false) { //
-			$configfilenamestr = $configfilename;
-		}
-	}
-	$content = fopen($path.$configfilenamestr,"r+");
-	$i=1;
-	while (!feof($content)) {
-		if ($i==$line) {
-			fseek($content,0,SEEK_CUR);
-			fwrite($content, $replaceStr);
-			break;
-		}
-		fgets($content);
-		$i++;
-	}
-	fclose($content);
-}
 
+include_once 'renamefun.php';
 
-modificationfolder($root_dir_name."/axi/","img",$newimgname,"");
-modificationfolder($root_dir_name."/axi/js/","config",$newconfigname,".js");
-//更改图片文件夹名称
-function modificationfolder($path,$key,$newname,$suffix)
-{
-	$axi = opendir($path);
-	while( ($rootfilename = readdir($axi)) !== false ) 
-	{
-		if ($rootfilename!="."&&$rootfilename!=".."&&strpos($rootfilename,$key)!==false) {
-			$needpath = $rootfilename;
-		}
-	}
-	if (rename($path.$needpath,$path.$newname.$suffix)) {
-		echo "成功";
+if ($type==="img") {
+	
+	if(modificationfolder($root_dir_name."/axi/","img",$newname,"")&&modificationfile('"img_url":"'.$newname.'"',2,$root_dir_name."/axi/js/","config")){
+		echo json_encode(array(
+			"result"=>"200",
+			"message"=>"成功!"
+		));
 	}else {
-		echo "失败";
+		echo json_encode(array(
+			"result"=>"201",
+			"message"=>"失败!"
+		));
+	}
+}elseif ($type==="config") {
+	
+	if(modificationfolder($root_dir_name."/axi/js/","config",$newname,".js")&&modificationfile('<script type="text/javascript" src="js/'.$newname.'.js"></script>',73,$root_dir_name."/axi/","index")){
+		echo json_encode(array(
+			"result"=>"200",
+			"message"=>"成功!"
+		));
+	}else{
+		echo json_encode(array(
+			"result"=>"201",
+			"message"=>"失败!"
+		));
 	}
 }
-
 ?>

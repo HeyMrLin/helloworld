@@ -1,8 +1,9 @@
 <?php 
 header('Access-Control-Allow-Origin:https://localhost:8080');
 header('Access-Control-Allow-Origin:*');
+include_once './getpath.php';
 $filename = $_POST["filename"];
-$path = $_SERVER['DOCUMENT_ROOT']."/axi/img_1.0.0/";
+$path = $_SERVER['DOCUMENT_ROOT']."/axi/".getPath("/axi/","img")."/";
 $filepath = $path.$filename;
 if(is_file($filepath)){
 	if(unlink($filepath)){

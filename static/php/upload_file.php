@@ -27,8 +27,8 @@ if ((($_FILES["file"]["type"] == "image/gif")
     if ($_FILES["file"]["error"] > 0)
     {
         echo json_encode(array(
-            "result"=>"200",
-            "message"=>"上传成功!"
+            "result"=>"203",
+            "message"=>"上传失败!"
         ));
     }
     else
@@ -43,6 +43,10 @@ if ((($_FILES["file"]["type"] == "image/gif")
         if (file_exists("upload/" . $_FILES["file"]["name"]))
         {
             //echo $_FILES["file"]["name"] . " 文件已经存在。 ";
+            echo json_encode(array(
+                "result"=>"204",
+                "message"=>"文件已经存在!"
+            ));
         }
         else
         {
@@ -65,6 +69,9 @@ if ((($_FILES["file"]["type"] == "image/gif")
 }
 else
 {
-    echo "非法的文件格式";
+    echo json_decode(array(
+        "result"=>"202",
+        "message"=>"非法的文件格式!"
+    ));
 }
 ?>
