@@ -47,8 +47,22 @@
         }else {
           name = _this.configFileName;
         }
-        $.post("/dist/static/php/rename.php", {type:type,newname:name}, function (res) {
+        $.post("http://localhost:8888/uploadfile/rename.php", {type:type,newname:name}, function (res) {
           console.log(JSON.parse(res));
+          let json = JSON.parse(res);
+          if(json.result === "200"){
+            _this.imgFileName = "";
+            _this.configFileName = "";
+            _this.$message({
+              message:"替换成功!",
+              type:"success"
+            });
+            _this.$emit("get-data");
+          }else {
+            _this.message({
+              message:"替换失败!请联系管理员!"
+            })
+          }
         });
       },
     },

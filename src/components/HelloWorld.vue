@@ -1,9 +1,9 @@
 <template>
   <div>
     <el-upload
-      class="upload-demo"
-      ref="upload"
-      action="/dist/static/php/upload_file.php"
+      class="upload-single"
+      ref="uploadSingle"
+      action="http://localhost:8888/uploadfile/upload_file.php"
       :on-success="successUpload"
       :auto-upload="false">
       <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
@@ -22,7 +22,7 @@
         </el-col>
       </el-form>
     </el-row>
-    <re-name :img="imgFileName" :config="configFileName"></re-name>
+    <re-name :img="imgFileName" :config="configFileName" @get-data="getData"></re-name>
     <el-table
       :data="imgFileNameData"
       style="width: 100%">
@@ -37,21 +37,65 @@
         label="file"
         width="180">
       </el-table-column>
+      <el-table-column
+        label="operation"
+        width="360"
+        align="center"
+      >
+        <template slot-scope="scope">
+          <el-button type="text" @click="showPicture(scope.row)" size="small">查看</el-button>
+          <el-upload
+            class="upload"
+            ref="upload"
+            action="http://localhost:8888/uploadfile/upload_file.php"
+            :on-success="successUpload">
+            <el-button slot="trigger" size="small" type="text">替换</el-button>
+            <!--<el-button style="margin-left: 10px;" size="small" type="text" @click="submitUpload">上传到服务器</el-button>-->
+          </el-upload>
+          <el-button type="text" @click="deleteFiles(scope.row)" size="small" style="margin-left: 10px">删除</el-button>
+        </template>
+      </el-table-column>
     </el-table>
+    <el-dialog
+      :visible.sync="isShow"
+
+    >
+      <el-carousel height="450px">
+        <el-carousel-item v-for="(picture,index) in pictureArr" :key="index">
+          <img :src="picture" style="height: 100%">
+        </el-carousel-item>
+      </el-carousel>
+    </el-dialog>
+
+    <!--是否删除-->
+    <el-dialog
+      title="提示"
+      :visible.sync="isDelete"
+      width="30%">
+      <span>是否删除!</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button @click="isDelete = false">取 消</el-button>
+    <el-button type="primary" @click="deleteFile">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
   import reName from './rename.vue'
+
   export default {
     name: 'HelloWorld',
     data() {
       return {
-        msg: 'Welcome to Your Vue.js App',
         imgFileNameData: [], //文件名
-        deleteFileName:"", //需要删除的图片名
-        imgFileName:"",
-        configFileName:"",
+        deleteFileName: "", //需要删除的图片名
+        imgFileName: "",
+        configFileName: "",
+        isShow: false,
+        serverPath: "",
+        pictureArr: [],
+        isDelete: false,
       }
     },
     mounted() {
@@ -59,43 +103,63 @@
     },
     methods: {
       submitUpload() {
-        this.$refs.upload.submit();
+        this.$refs.uploadSingle.submit();
       },
       successUpload(response){
         if(response.result === "200"){
           this.getData();
+          this.$message({
+            message: "上传成功!",
+            type: "success"
+          });
         }
       },
       getData() {
         let _this = this;
-        _this.imgFileNameData=[];
-        $.post("/dist/static/php/handlefile.php", {}, function (res) {
-          //console.log(JSON.parse(res));
+        _this.imgFileNameData = [];
+        $.post("http://localhost:8888/uploadfile/handlefile.php", {}, function (res) {
+          console.log(JSON.parse(res));
           let json = JSON.parse(res);
+          _this.serverPath = json.imgPath;
           for (let i = 0; i < json.data.length; i++) {
             _this.imgFileNameData.push(JSON.parse(json.data[i]))
           }
+<<<<<<< HEAD
+          _this.imgFileNameData.sort(function (a, b) {
+            return a.filename - b.filename;
+=======
           _this.imgFileNameData.sort(function (a,b) {
-            return a.filename-b.filename;
+            return parseInt(a.filename)-parseInt(b.filename);
+>>>>>>> d72782b56c934fe6984f53f13568aefb083a8359
           });
           _this.imgFileName = json.imgFileName;
-          _this.configFileName = json.configFileName.replace(/\.js/,"");
+          _this.configFileName = json.configFileName.replace(/\.js/, "");
         });
       },
       deleteFile() {
-        let _this=this;
-        $.post("/dist/static/php/deletefile.php", {filename: this.deleteFileName}, function (data) {
-          //console.log(JSON.parse(data));
+        let _this = this;
+        $.post("http://localhost:8888/uploadfile/deletefile.php", {filename: this.deleteFileName}, function (data) {
+          console.log(JSON.parse(data));
           let json = JSON.parse(data);
           if (json.result === "200") {
+            _this.isDelete = false;
             _this.getData();
-            _this.deleteFileName="";
+            _this.deleteFileName = "";
             _this.$message({
-              message:"删除成功!",
-              type:"success"
+              message: "删除成功!",
+              type: "success"
             });
           }
         })
+      },
+      deleteFiles(row) {
+        this.deleteFileName = row.filename;
+        this.isDelete = true;
+      },
+      showPicture(row) {
+        this.isShow = true;
+        this.pictureArr.length = 0;
+        this.pictureArr.push("http://" + this.serverPath + "/" + row.filename);
       },
     },
     components: {
@@ -123,4 +187,23 @@
   a {
     color: #42b983;
   }
+
+  .upload {
+    display: inline-block;
+    margin-left: 10px;
+  }
+
+  .upload .el-upload-list {
+    display: inline-block;
+  }
+
+  .el-upload-list {
+    display: inline-block;
+  }
+
+  .upload-single {
+    height: 100px;
+  }
+</style>
+<style>
 </style>
