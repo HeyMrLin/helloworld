@@ -3,7 +3,7 @@
     <el-upload
       class="upload-single"
       ref="uploadSingle"
-      action="http://localhost:8888/uploadfile/upload_file.php"
+      action="/dist/static/php/upload_file.php"
       :on-success="successUpload"
       :auto-upload="false">
       <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
@@ -47,7 +47,7 @@
           <el-upload
             class="upload"
             ref="upload"
-            action="http://localhost:8888/uploadfile/upload_file.php"
+            action="/dist/static/php/upload_file.php"
             :on-success="successUpload">
             <el-button slot="trigger" size="small" type="text">替换</el-button>
             <!--<el-button style="margin-left: 10px;" size="small" type="text" @click="submitUpload">上传到服务器</el-button>-->
@@ -58,13 +58,18 @@
     </el-table>
     <el-dialog
       :visible.sync="isShow"
-
+      custom-class="showPictureDialog"
+      width="60%"
     >
-      <el-carousel height="450px">
-        <el-carousel-item v-for="(picture,index) in pictureArr" :key="index">
-          <img :src="picture" style="height: 100%">
-        </el-carousel-item>
-      </el-carousel>
+      <template>
+        <el-carousel type="" height="450px">
+          <el-carousel-item v-for="(picture,index) in pictureArr" :key="index">
+            <div class="showPictureWrap">
+              <img :src="picture" class="showPictureImg">
+            </div>
+          </el-carousel-item>
+        </el-carousel>
+      </template>
     </el-dialog>
 
     <!--是否删除-->
@@ -90,12 +95,14 @@
       return {
         imgFileNameData: [], //文件名
         deleteFileName: "", //需要删除的图片名
-        imgFileName: "",
-        configFileName: "",
+        imgFileName: "img_1.0.0",
+        configFileName: "config_1.0.0",
         isShow: false,
         serverPath: "",
         pictureArr: [],
         isDelete: false,
+        imgHeight: "",
+        imgWidth: "",
       }
     },
     mounted() {
@@ -105,8 +112,8 @@
       submitUpload() {
         this.$refs.uploadSingle.submit();
       },
-      successUpload(response){
-        if(response.result === "200"){
+      successUpload(response) {
+        if (response.result === "200") {
           this.getData();
           this.$message({
             message: "上传成功!",
@@ -117,28 +124,23 @@
       getData() {
         let _this = this;
         _this.imgFileNameData = [];
-        $.post("http://localhost:8888/uploadfile/handlefile.php", {}, function (res) {
+        $.post("/dist/static/php/handlefile.php", {}, function (res) {
           console.log(JSON.parse(res));
           let json = JSON.parse(res);
           _this.serverPath = json.imgPath;
           for (let i = 0; i < json.data.length; i++) {
             _this.imgFileNameData.push(JSON.parse(json.data[i]))
           }
-<<<<<<< HEAD
           _this.imgFileNameData.sort(function (a, b) {
-            return a.filename - b.filename;
-=======
-          _this.imgFileNameData.sort(function (a,b) {
-            return parseInt(a.filename)-parseInt(b.filename);
->>>>>>> d72782b56c934fe6984f53f13568aefb083a8359
-          });
+            return a.filename.localeCompare(b.filename);
+          })
           _this.imgFileName = json.imgFileName;
           _this.configFileName = json.configFileName.replace(/\.js/, "");
         });
       },
       deleteFile() {
         let _this = this;
-        $.post("http://localhost:8888/uploadfile/deletefile.php", {filename: this.deleteFileName}, function (data) {
+        $.post("/dist/static/php/deletefile.php", {filename: this.deleteFileName}, function (data) {
           console.log(JSON.parse(data));
           let json = JSON.parse(data);
           if (json.result === "200") {
@@ -160,6 +162,12 @@
         this.isShow = true;
         this.pictureArr.length = 0;
         this.pictureArr.push("http://" + this.serverPath + "/" + row.filename);
+        let img = new Image();
+        img.src = "http://" + this.serverPath + "/" + row.filename;
+        if (img.complete) {
+          this.imgHeight = img.height;
+          this.imgWidth = (img.width) * ((img.height) / 450);
+        }
       },
     },
     components: {
@@ -204,6 +212,28 @@
   .upload-single {
     height: 100px;
   }
-</style>
-<style>
+
+  .showPictureDialog .el-dialog__header {
+    height: 0;
+  }
+  .showPictureDialog .el-dialog__body {
+    padding: 0;
+  }
+
+  .showPictureDialog .showPictureWrap {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .showPictureDialog .showPictureImg {
+    height: 100%;
+    vertical-align: middle;
+  }
+  .showPictureDialog .el-carousel__item {
+    display: block!important;
+  }
+
 </style>

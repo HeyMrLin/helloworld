@@ -18,6 +18,7 @@ while( ($filename = readdir($handler)) !== false )
 		$index++;
 	}
 }
+$serverPath = $_SERVER['HTTP_HOST']."/axi/".getPath("/axi/","img");
 $imgFileName = getPath("/axi/","img");
 $configFileName = getPath("/axi/js/","config");
 echo json_encode(array(
@@ -25,6 +26,7 @@ echo json_encode(array(
 	"message"=>"文件名获取成功",
 	"data"=>$filenamearr,
 	"imgFileName"=>$imgFileName,
-	"configFileName"=>$configFileName
+	"configFileName"=>$configFileName,
+	"imgPath"=>$serverPath
 ));
 ?>
